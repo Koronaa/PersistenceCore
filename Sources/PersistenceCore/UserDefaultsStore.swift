@@ -7,7 +7,7 @@
 
 import Foundation
 
-public final class UserDefaultsStore<T: Codable> {
+public actor UserDefaultsStore<T: Codable> {
 
     private let key: String
     private let defaults: UserDefaults

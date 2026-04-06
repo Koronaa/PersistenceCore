@@ -5,7 +5,7 @@ A lightweight Swift Package providing type-safe, generic local persistence primi
 ```swift
 // Store any Codable type in two lines
 let store = UserDefaultsStore<User>(key: "com.app.user")
-try store.save(user)
+try await store.save(user)
 
 // Sensitive data goes to the Keychain
 let keychain = KeychainStore(service: "com.app.auth")
@@ -83,23 +83,23 @@ let store = UserDefaultsStore<UserProfile>(key: "com.app.userProfile")
 
 // Save
 let profile = UserProfile(id: "123", name: "Kenji", email: "kenji@example.com")
-try store.save(profile)
+try await store.save(profile)
 
 // Fetch — returns nil if nothing stored yet
-if let saved = try store.fetch() {
+if let saved = try await store.fetch() {
     print(saved.name) // "Kenji"
 }
 
 // Clear
-store.clear()
+await store.clear()
 ```
 
 **Arrays work identically:**
 
 ```swift
 let store = UserDefaultsStore<[String]>(key: "com.app.recentSearches")
-try store.save(["Tokyo", "Osaka", "Kyoto"])
-let searches = try store.fetch() ?? []
+try await store.save(["Tokyo", "Osaka", "Kyoto"])
+let searches = try await store.fetch() ?? []
 ```
 
 **Custom UserDefaults suite (e.g. App Groups for widget sharing):**
@@ -143,7 +143,7 @@ Both stores throw on failure. Wrap calls in `do/catch` or propagate with `throws
 
 ```swift
 do {
-    try store.save(profile)
+    try await store.save(profile)
 } catch {
     // UserDefaults: JSONEncoder failure (malformed Codable conformance)
     // Keychain: KeychainStore.KeychainError.saveFailed(OSStatus)
@@ -253,22 +253,22 @@ final class UserDefaultsStoreTests: XCTestCase {
         sut = nil
     }
 
-    func test_save_andFetch_roundtrip() throws {
+    func test_save_andFetch_roundtrip() async throws {
         let profile = UserProfile(id: "1", name: "Kenji", email: "k@example.com")
-        try sut.save(profile)
-        let fetched = try sut.fetch()
+        try await sut.save(profile)
+        let fetched = try await sut.fetch()
         XCTAssertEqual(fetched?.id, profile.id)
         XCTAssertEqual(fetched?.name, profile.name)
     }
 
-    func test_fetch_returnsNil_whenNothingStored() throws {
-        XCTAssertNil(try sut.fetch())
+    func test_fetch_returnsNil_whenNothingStored() async throws {
+        XCTAssertNil(try await sut.fetch())
     }
 
-    func test_clear_removesStoredValue() throws {
-        try sut.save(UserProfile(id: "1", name: "Kenji", email: "k@example.com"))
-        sut.clear()
-        XCTAssertNil(try sut.fetch())
+    func test_clear_removesStoredValue() async throws {
+        try await sut.save(UserProfile(id: "1", name: "Kenji", email: "k@example.com"))
+        await sut.clear()
+        XCTAssertNil(try await sut.fetch())
     }
 }
 ```
