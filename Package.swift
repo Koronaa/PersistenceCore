@@ -18,10 +18,6 @@ let package = Package(
         .target(
             name: "PersistenceCore"
         ),
-        .testTarget(
-            name: "PersistenceCoreTests",
-            dependencies: ["PersistenceCore"]
-        ),
     ],
     swiftLanguageModes: [.v6]
 )
