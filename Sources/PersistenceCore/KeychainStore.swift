@@ -8,7 +8,7 @@
 import Foundation
 import Security
 
-public final class KeychainStore {
+public actor KeychainStore {
     private let service: String
 
     public init(service: String) {
@@ -41,13 +41,10 @@ public final class KeychainStore {
         ]
 
         var result: AnyObject?
-        let staus = SecItemCopyMatching(
-            query as CFDictionary,
-            &result
-        )
-        guard staus == errSecSuccess,
-            let data = result as? Data,
-            let string = String(data: data, encoding: .utf8)
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        guard status == errSecSuccess,
+              let data = result as? Data,
+              let string = String(data: data, encoding: .utf8)
         else { return nil }
         return string
     }
