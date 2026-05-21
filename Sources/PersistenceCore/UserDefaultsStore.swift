@@ -13,6 +13,7 @@ public actor UserDefaultsStore<T: Codable> {
     private let defaults: UserDefaults
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
+    private var cache: [String: T] = [:]
 
     public init(key: String, defaults: UserDefaults = .standard) {
         self.key = key
@@ -22,14 +23,22 @@ public actor UserDefaultsStore<T: Codable> {
     public func save(_ value: T) throws {
         let data = try encoder.encode(value)
         defaults.set(data, forKey: key)
+        cache[key] = value
     }
 
     public func fetch() throws -> T? {
+        if let cached = cache[key] {
+            return cached
+        }
+
         guard let data = defaults.data(forKey: key) else { return nil }
-        return try decoder.decode(T.self, from: data)
+        let value = try decoder.decode(T.self, from: data)
+        cache[key] = value
+        return value
     }
 
     public func clear() {
         defaults.removeObject(forKey: key)
+        cache.removeValue(forKey: key)
     }
 }
